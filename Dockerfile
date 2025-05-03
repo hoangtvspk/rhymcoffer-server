@@ -11,7 +11,7 @@ COPY --from=build /app/build/libs/*.jar app.jar
 
 # Set environment variables
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
-ENV SPRING_PROFILES_ACTIVE=prod
+ENV SPRING_PROFILES_ACTIVE=dev
 
 # Expose the port your app runs on
 EXPOSE 8080
