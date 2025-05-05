@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -20,9 +19,8 @@ public class ArtistResponse {
     private String description;
     private Integer popularity;
     private List<String> genres;
-    private Set<Long> trackIds;
-    private Set<Long> albumIds;
-    private Set<Long> followerIds;
+    private List<TrackResponse> tracks;
+    private List<AlbumResponse> albums;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-} 
+}

@@ -24,8 +24,6 @@ public class TrackResponse {
     private String isrc;
     private Long albumId;
     private Set<Long> artistIds;
-    private Set<Long> playlistIds;
-    private Set<Long> savedByUserIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-} 
+}

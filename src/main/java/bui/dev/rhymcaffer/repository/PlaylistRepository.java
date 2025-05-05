@@ -11,16 +11,23 @@ import java.util.List;
 @Repository
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     List<Playlist> findByNameContainingIgnoreCase(String name);
-    
+
     @Query("SELECT p FROM Playlist p WHERE p.owner.id = :userId")
     List<Playlist> findByOwnerId(@Param("userId") Long userId);
-    
+
     @Query("SELECT p FROM Playlist p JOIN p.followers f WHERE f.id = :userId")
     List<Playlist> findFollowedPlaylists(@Param("userId") Long userId);
-    
+
     @Query("SELECT p FROM Playlist p WHERE p.isPublic = true ORDER BY p.createdAt DESC")
     List<Playlist> findPublicPlaylists();
-    
+
     @Query("SELECT p FROM Playlist p WHERE p.collaborative = true")
     List<Playlist> findCollaborativePlaylists();
-} 
+
+    List<Playlist> findByOwner_Id(Long ownerId);
+
+    List<Playlist> findByFollowers_Id(Long userId);
+
+    List<Playlist> findByIsPublicTrue();
+
+}

@@ -74,4 +74,9 @@ public class JwtService {
         byte[] keyBytes = secretKey.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    // No-op for stateless JWTs; implement blacklist if needed
+    public void invalidateToken(String token) {
+        // JWTs are stateless; implement blacklist if you want to support forced logout
+    }
 }

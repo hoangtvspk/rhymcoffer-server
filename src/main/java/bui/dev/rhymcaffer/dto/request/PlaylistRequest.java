@@ -15,4 +15,4 @@ public class PlaylistRequest {
     private Boolean isPublic;
     private Boolean collaborative;
     private Set<Long> trackIds;
-} 
+}

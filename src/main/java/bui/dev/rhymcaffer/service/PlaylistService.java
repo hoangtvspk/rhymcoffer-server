@@ -1,6 +1,7 @@
 package bui.dev.rhymcaffer.service;
 
 import bui.dev.rhymcaffer.dto.request.PlaylistRequest;
+import bui.dev.rhymcaffer.dto.response.BaseResponse;
 import bui.dev.rhymcaffer.dto.response.PlaylistResponse;
 import bui.dev.rhymcaffer.model.*;
 import bui.dev.rhymcaffer.repository.*;
@@ -16,156 +17,344 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlaylistService {
 
-    private final PlaylistRepository playlistRepository;
-    private final TrackRepository trackRepository;
-    private final UserRepository userRepository;
+        private final PlaylistRepository playlistRepository;
+        private final TrackRepository trackRepository;
+        private final UserRepository userRepository;
 
-    @Transactional
-    public PlaylistResponse createPlaylist(PlaylistRequest request, Long ownerId) {
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        @Transactional
+        public BaseResponse<Void> createPlaylist(PlaylistRequest request, Long ownerId) {
+                try {
+                        Playlist playlist = Playlist.builder()
+                                        .name(request.getName())
+                                        .description(request.getDescription())
+                                        .imageUrl(request.getImageUrl())
+                                        .isPublic(request.getIsPublic())
+                                        .collaborative(request.getCollaborative())
+                                        .build();
 
-        Playlist playlist = Playlist.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .imageUrl(request.getImageUrl())
-                .isPublic(request.getIsPublic() != null ? request.getIsPublic() : true)
-                .collaborative(request.getCollaborative() != null ? request.getCollaborative() : false)
-                .owner(owner)
-                .build();
+                        User owner = userRepository.findById(ownerId)
+                                        .orElseThrow(() -> new RuntimeException("Owner not found"));
+                        playlist.setOwner(owner);
 
-        if (request.getTrackIds() != null && !request.getTrackIds().isEmpty()) {
-            Set<Track> tracks = request.getTrackIds().stream()
-                    .map(trackId -> trackRepository.findById(trackId)
-                            .orElseThrow(() -> new RuntimeException("Track not found with id: " + trackId)))
-                    .collect(Collectors.toSet());
-            playlist.setTracks(tracks);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Playlist created successfully")
+                                        .build();
+                } catch (Exception e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(400)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
         }
 
-        playlist = playlistRepository.save(playlist);
-        return mapToResponse(playlist);
-    }
-
-    @Transactional(readOnly = true)
-    public PlaylistResponse getPlaylist(Long id) {
-        Playlist playlist = playlistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        return mapToResponse(playlist);
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> getAllPlaylists() {
-        return playlistRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> searchPlaylists(String name) {
-        return playlistRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> getPlaylistsByOwner(Long ownerId) {
-        return playlistRepository.findByOwnerId(ownerId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> getFollowedPlaylists(Long userId) {
-        return playlistRepository.findFollowedPlaylists(userId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> getPublicPlaylists() {
-        return playlistRepository.findPublicPlaylists().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<PlaylistResponse> getCollaborativePlaylists() {
-        return playlistRepository.findCollaborativePlaylists().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void addTrackToPlaylist(Long playlistId, Long trackId, Long userId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        
-        if (!playlist.getOwner().getId().equals(userId) && !playlist.getCollaborative()) {
-            throw new RuntimeException("You don't have permission to modify this playlist");
+        @Transactional(readOnly = true)
+        public BaseResponse<PlaylistResponse> getPlaylist(Long id) {
+                try {
+                        Playlist playlist = playlistRepository.findById(id)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                        PlaylistResponse response = mapToResponse(playlist);
+                        return BaseResponse.<PlaylistResponse>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(response)
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<PlaylistResponse>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
         }
 
-        Track track = trackRepository.findById(trackId)
-                .orElseThrow(() -> new RuntimeException("Track not found"));
-
-        playlist.getTracks().add(track);
-        playlistRepository.save(playlist);
-    }
-
-    @Transactional
-    public void removeTrackFromPlaylist(Long playlistId, Long trackId, Long userId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        
-        if (!playlist.getOwner().getId().equals(userId) && !playlist.getCollaborative()) {
-            throw new RuntimeException("You don't have permission to modify this playlist");
+        @Transactional(readOnly = true)
+        public BaseResponse<List<PlaylistResponse>> getAllPlaylists() {
+                try {
+                        List<Playlist> playlists = playlistRepository.findAll();
+                        List<PlaylistResponse> responses = playlists.stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(responses)
+                                        .build();
+                } catch (Exception e) {
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(500)
+                                        .isSuccess(false)
+                                        .message("Failed to retrieve playlists: " + e.getMessage())
+                                        .build();
+                }
         }
 
-        Track track = trackRepository.findById(trackId)
-                .orElseThrow(() -> new RuntimeException("Track not found"));
+        @Transactional(readOnly = true)
+        public BaseResponse<List<PlaylistResponse>> searchPlaylists(String name) {
+                try {
+                        List<Playlist> playlists = playlistRepository.findByNameContainingIgnoreCase(name);
+                        List<PlaylistResponse> responses = playlists.stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(responses)
+                                        .build();
+                } catch (Exception e) {
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(400)
+                                        .isSuccess(false)
+                                        .message("Search failed: " + e.getMessage())
+                                        .build();
+                }
+        }
 
-        playlist.getTracks().remove(track);
-        playlistRepository.save(playlist);
-    }
+        @Transactional(readOnly = true)
+        public BaseResponse<List<PlaylistResponse>> getPlaylistsByOwner(Long ownerId) {
+                try {
+                        List<Playlist> playlists = playlistRepository.findByOwner_Id(ownerId);
+                        List<PlaylistResponse> responses = playlists.stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(responses)
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
 
-    @Transactional
-    public void followPlaylist(Long playlistId, Long userId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        @Transactional(readOnly = true)
+        public BaseResponse<List<PlaylistResponse>> getFollowedPlaylists(Long userId) {
+                try {
+                        List<Playlist> playlists = playlistRepository.findByFollowers_Id(userId);
+                        List<PlaylistResponse> responses = playlists.stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(responses)
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
 
-        playlist.getFollowers().add(user);
-        playlistRepository.save(playlist);
-    }
+        @Transactional(readOnly = true)
+        public BaseResponse<List<PlaylistResponse>> getPublicPlaylists() {
+                try {
+                        List<Playlist> playlists = playlistRepository.findByIsPublicTrue();
+                        List<PlaylistResponse> responses = playlists.stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Success")
+                                        .data(responses)
+                                        .build();
+                } catch (Exception e) {
+                        return BaseResponse.<List<PlaylistResponse>>builder()
+                                        .statusCode(500)
+                                        .isSuccess(false)
+                                        .message("Failed to retrieve public playlists: " + e.getMessage())
+                                        .build();
+                }
+        }
 
-    @Transactional
-    public void unfollowPlaylist(Long playlistId, Long userId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        playlist.getFollowers().remove(user);
-        playlistRepository.save(playlist);
-    }
 
-    private PlaylistResponse mapToResponse(Playlist playlist) {
-        return PlaylistResponse.builder()
-                .id(playlist.getId())
-                .name(playlist.getName())
-                .description(playlist.getDescription())
-                .imageUrl(playlist.getImageUrl())
-                .isPublic(playlist.getIsPublic())
-                .collaborative(playlist.getCollaborative())
-                .ownerId(playlist.getOwner().getId())
-                .trackIds(playlist.getTracks().stream()
-                        .map(track -> track.getId())
-                        .collect(Collectors.toSet()))
-                .followerIds(playlist.getFollowers().stream()
-                        .map(user -> user.getId())
-                        .collect(Collectors.toSet()))
-                .createdAt(playlist.getCreatedAt())
-                .updatedAt(playlist.getUpdatedAt())
-                .build();
-    }
-} 
+        @Transactional
+        public BaseResponse<Void> addTrackToPlaylist(Long playlistId, Long trackId) {
+                try {
+                        Playlist playlist = playlistRepository.findById(playlistId)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                        Track track = trackRepository.findById(trackId)
+                                        .orElseThrow(() -> new RuntimeException("Track not found"));
+
+                        playlist.getTracks().add(track);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Track added to playlist successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        @Transactional
+        public BaseResponse<Void> removeTrackFromPlaylist(Long playlistId, Long trackId) {
+                try {
+                        Playlist playlist = playlistRepository.findById(playlistId)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                        Track track = trackRepository.findById(trackId)
+                                        .orElseThrow(() -> new RuntimeException("Track not found"));
+
+                        playlist.getTracks().remove(track);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Track removed from playlist successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        @Transactional
+        public BaseResponse<Void> followPlaylist(Long playlistId, Long userId) {
+                try {
+                        Playlist playlist = playlistRepository.findById(playlistId)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                        User user = userRepository.findById(userId)
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                        playlist.getFollowers().add(user);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Playlist followed successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        @Transactional
+        public BaseResponse<Void> unfollowPlaylist(Long playlistId, Long userId) {
+                try {
+                        Playlist playlist = playlistRepository.findById(playlistId)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                        User user = userRepository.findById(userId)
+                                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                        playlist.getFollowers().remove(user);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Playlist unfollowed successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        @Transactional
+        public BaseResponse<Void> deletePlaylist(Long id) {
+                try {
+                        playlistRepository.deleteById(id);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Playlist deleted successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        @Transactional
+        public BaseResponse<Void> updatePlaylist(Long id, PlaylistRequest request, Long ownerId) {
+                try {
+                        Playlist playlist = playlistRepository.findById(id)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+
+                        if (request.getName() != null) {
+                                playlist.setName(request.getName());
+                        }
+                        if (request.getDescription() != null) {
+                                playlist.setDescription(request.getDescription());
+                        }
+                        if (request.getImageUrl() != null) {
+                                playlist.setImageUrl(request.getImageUrl());
+                        }
+                        if (request.getIsPublic() != null) {
+                                playlist.setIsPublic(request.getIsPublic());
+                        }
+                        if (request.getCollaborative() != null) {
+                                playlist.setCollaborative(request.getCollaborative());
+                        }
+                        User owner = userRepository.findById(ownerId)
+                                        .orElseThrow(() -> new RuntimeException("Owner not found"));
+                        playlist.setOwner(owner);
+
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Playlist updated successfully")
+                                        .build();
+                } catch (RuntimeException e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(404)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
+        private PlaylistResponse mapToResponse(Playlist playlist) {
+                return PlaylistResponse.builder()
+                                .id(playlist.getId())
+                                .name(playlist.getName())
+                                .description(playlist.getDescription())
+                                .imageUrl(playlist.getImageUrl())
+                                .isPublic(playlist.getIsPublic())
+                                .collaborative(playlist.getCollaborative())
+                                .ownerId(playlist.getOwner().getId())
+                                .trackIds(playlist.getTracks().stream()
+                                                .map(track -> track.getId())
+                                                .collect(Collectors.toSet()))
+                                .followerIds(playlist.getFollowers().stream()
+                                                .map(user -> user.getId())
+                                                .collect(Collectors.toSet()))
+                                .createdAt(playlist.getCreatedAt())
+                                .updatedAt(playlist.getUpdatedAt())
+                                .build();
+        }
+}
