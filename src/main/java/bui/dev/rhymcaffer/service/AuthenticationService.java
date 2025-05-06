@@ -10,7 +10,11 @@ import bui.dev.rhymcaffer.repository.RoleRepository;
 import bui.dev.rhymcaffer.repository.UserRepository;
 import bui.dev.rhymcaffer.security.JwtService;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +25,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
 
         private final UserRepository userRepository;
@@ -29,7 +34,29 @@ public class AuthenticationService {
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
 
-        public BaseResponse<AuthenticationResponse> register(RegisterRequest request) {
+        @Value("${jwt.refresh-expiration}")
+        private long refreshExpiration;
+
+        private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+                log.info("Setting refresh token cookie with token: {}", refreshToken);
+
+                Cookie cookie = new Cookie("refreshToken", refreshToken);
+                cookie.setHttpOnly(true);
+                // cookie.setSecure(true); // Disable for localhost
+                cookie.setPath("/");
+                cookie.setMaxAge((int) (refreshExpiration / 1000));
+                cookie.setAttribute("SameSite", "Lax"); // Use Lax for localhost
+                response.addCookie(cookie);
+
+                String cookieHeader = String.format(
+                                "refreshToken=%s; HttpOnly; Path=/; Max-Age=%d; SameSite=Lax",
+                                refreshToken, (int) (refreshExpiration / 1000));
+                response.setHeader("Set-Cookie", cookieHeader);
+
+                log.info("Cookie header set: {}", cookieHeader);
+        }
+
+        public BaseResponse<AuthenticationResponse> register(RegisterRequest request, HttpServletResponse response) {
                 try {
                         if (userRepository.existsByUsername(request.getUsername())) {
                                 return BaseResponse.<AuthenticationResponse>builder()
@@ -47,7 +74,6 @@ public class AuthenticationService {
                                                 .build();
                         }
 
-                        // Get or create the default ROLE_USER role
                         Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
                                         .orElseGet(() -> roleRepository.save(Role.builder()
                                                         .name(Role.RoleName.ROLE_USER)
@@ -65,10 +91,14 @@ public class AuthenticationService {
                         userRepository.save(user);
 
                         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                        String jwtToken = jwtService.generateToken(userDetails);
+                        String accessToken = jwtService.generateToken(userDetails);
+                        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-                        AuthenticationResponse response = AuthenticationResponse.builder()
-                                        .token(jwtToken)
+                        // Set refresh token in cookie
+                        setRefreshTokenCookie(response, refreshToken);
+
+                        AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                                        .accessToken(accessToken)
                                         .username(user.getUsername())
                                         .displayName(user.getDisplayName())
                                         .email(user.getEmail())
@@ -78,7 +108,7 @@ public class AuthenticationService {
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("User registered successfully")
-                                        .data(response)
+                                        .data(authResponse)
                                         .build();
                 } catch (Exception e) {
                         return BaseResponse.<AuthenticationResponse>builder()
@@ -89,7 +119,8 @@ public class AuthenticationService {
                 }
         }
 
-        public BaseResponse<AuthenticationResponse> authenticate(AuthenticationRequest request) {
+        public BaseResponse<AuthenticationResponse> authenticate(AuthenticationRequest request,
+                        HttpServletResponse response) {
                 try {
                         authenticationManager.authenticate(
                                         new UsernamePasswordAuthenticationToken(
@@ -100,10 +131,14 @@ public class AuthenticationService {
                                         .orElseThrow(() -> new RuntimeException("User not found"));
 
                         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                        String jwtToken = jwtService.generateToken(userDetails);
+                        String accessToken = jwtService.generateToken(userDetails);
+                        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-                        AuthenticationResponse response = AuthenticationResponse.builder()
-                                        .token(jwtToken)
+                        // Set refresh token in cookie
+                        setRefreshTokenCookie(response, refreshToken);
+
+                        AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                                        .accessToken(accessToken)
                                         .username(user.getUsername())
                                         .displayName(user.getDisplayName())
                                         .email(user.getEmail())
@@ -113,7 +148,7 @@ public class AuthenticationService {
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Login successful")
-                                        .data(response)
+                                        .data(authResponse)
                                         .build();
                 } catch (RuntimeException e) {
                         return BaseResponse.<AuthenticationResponse>builder()
@@ -124,9 +159,17 @@ public class AuthenticationService {
                 }
         }
 
-        public BaseResponse<Void> logout(String token) {
+        public BaseResponse<Void> logout(String token, HttpServletResponse response) {
                 try {
                         jwtService.invalidateToken(token);
+
+                        // Clear refresh token cookie
+                        Cookie cookie = new Cookie("refreshToken", null);
+                        cookie.setHttpOnly(true);
+                        cookie.setPath("/");
+                        cookie.setMaxAge(0);
+                        response.addCookie(cookie);
+
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
@@ -141,17 +184,26 @@ public class AuthenticationService {
                 }
         }
 
-        public BaseResponse<AuthenticationResponse> refreshToken(String token) {
+        public BaseResponse<AuthenticationResponse> refreshToken(String refreshToken, HttpServletResponse response) {
                 try {
-                        String username = jwtService.extractUsername(token);
+                        String username = jwtService.extractUsername(refreshToken);
                         User user = userRepository.findByUsername(username)
                                         .orElseThrow(() -> new RuntimeException("User not found"));
 
                         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                        String newToken = jwtService.generateToken(userDetails);
 
-                        AuthenticationResponse response = AuthenticationResponse.builder()
-                                        .token(newToken)
+                        if (!jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
+                                throw new RuntimeException("Invalid refresh token");
+                        }
+
+                        String newAccessToken = jwtService.generateToken(userDetails);
+                        String newRefreshToken = jwtService.generateRefreshToken(userDetails);
+
+                        // Set new refresh token in cookie
+                        setRefreshTokenCookie(response, newRefreshToken);
+
+                        AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                                        .accessToken(newAccessToken)
                                         .username(user.getUsername())
                                         .displayName(user.getDisplayName())
                                         .email(user.getEmail())
@@ -161,7 +213,7 @@ public class AuthenticationService {
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Token refreshed successfully")
-                                        .data(response)
+                                        .data(authResponse)
                                         .build();
                 } catch (RuntimeException e) {
                         return BaseResponse.<AuthenticationResponse>builder()

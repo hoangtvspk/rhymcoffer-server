@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -72,8 +73,10 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://localhost:8000");
+        config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.setExposedHeaders(Arrays.asList("Authorization", "Refresh-Token", "Set-Cookie"));
         source.registerCorsConfiguration("/**", config);
         return new org.springframework.web.filter.CorsFilter(source);
     }
