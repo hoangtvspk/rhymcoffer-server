@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,8 +32,8 @@ public class ArtistService {
                                         .imageUrl(request.getImageUrl())
                                         .description(request.getDescription())
                                         .popularity(request.getPopularity())
-                                        .genres(request.getGenres())
                                         .build();
+
 
                         artistRepository.save(artist);
                         return BaseResponse.<Void>builder()
@@ -220,9 +221,6 @@ public class ArtistService {
                         if (request.getPopularity() != null) {
                                 artist.setPopularity(request.getPopularity());
                         }
-                        if (request.getGenres() != null) {
-                                artist.setGenres(request.getGenres());
-                        }
                         artistRepository.save(artist);
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)
@@ -245,7 +243,6 @@ public class ArtistService {
                                 .imageUrl(artist.getImageUrl())
                                 .description(artist.getDescription())
                                 .popularity(artist.getPopularity())
-                                .genres(artist.getGenres())
                                 .createdAt(artist.getCreatedAt())
                                 .updatedAt(artist.getUpdatedAt());
 
@@ -258,7 +255,7 @@ public class ArtistService {
                                                                         .imageUrl(track.getImageUrl())
                                                                         .durationMs(track.getDurationMs())
                                                                         .popularity(track.getPopularity())
-                                                                        .previewUrl(track.getPreviewUrl())
+                                                                        .trackUrl(track.getTrackUrl())
                                                                         .trackNumber(track.getTrackNumber())
                                                                         .explicit(track.getExplicit())
                                                                         .isrc(track.getIsrc())

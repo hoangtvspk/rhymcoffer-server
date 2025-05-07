@@ -30,7 +30,7 @@ public class TrackService {
                                         .imageUrl(request.getImageUrl())
                                         .durationMs(request.getDurationMs())
                                         .popularity(request.getPopularity())
-                                        .previewUrl(request.getPreviewUrl())
+                                        .trackUrl(request.getTrackUrl())
                                         .trackNumber(request.getTrackNumber())
                                         .explicit(request.getExplicit())
                                         .isrc(request.getIsrc())
@@ -304,8 +304,8 @@ public class TrackService {
                         if (request.getPopularity() != null) {
                                 track.setPopularity(request.getPopularity());
                         }
-                        if (request.getPreviewUrl() != null) {
-                                track.setPreviewUrl(request.getPreviewUrl());
+                        if (request.getTrackUrl() != null) {
+                                track.setTrackUrl(request.getTrackUrl());
                         }
                         if (request.getTrackNumber() != null) {
                                 track.setTrackNumber(request.getTrackNumber());
@@ -352,7 +352,7 @@ public class TrackService {
                                 .imageUrl(track.getImageUrl())
                                 .durationMs(track.getDurationMs())
                                 .popularity(track.getPopularity())
-                                .previewUrl(track.getPreviewUrl())
+                                .trackUrl(track.getTrackUrl())
                                 .trackNumber(track.getTrackNumber())
                                 .explicit(track.getExplicit())
                                 .isrc(track.getIsrc())

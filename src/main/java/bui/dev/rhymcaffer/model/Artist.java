@@ -34,11 +34,6 @@ public class Artist {
     private String description;
     private Integer popularity;
 
-    @ElementCollection
-    @CollectionTable(name = "artist_genres", joinColumns = @JoinColumn(name = "artist_id"))
-    @Column(name = "genre")
-    private List<String> genres = new ArrayList<>();
-
     @ManyToMany(mappedBy = "artists")
     private Set<Track> tracks = new HashSet<>();
 
@@ -46,11 +41,7 @@ public class Artist {
     private Set<Album> albums = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "artist_followers",
-        joinColumns = @JoinColumn(name = "artist_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "artist_followers", joinColumns = @JoinColumn(name = "artist_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> followers = new HashSet<>();
 
     @CreatedDate
@@ -58,4 +49,4 @@ public class Artist {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-} 
+}

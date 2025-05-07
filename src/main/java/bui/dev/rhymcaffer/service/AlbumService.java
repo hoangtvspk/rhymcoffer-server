@@ -349,7 +349,7 @@ public class AlbumService {
                                                         .imageUrl(track.getImageUrl())
                                                         .durationMs(track.getDurationMs())
                                                         .popularity(track.getPopularity())
-                                                        .previewUrl(track.getPreviewUrl())
+                                                        .trackUrl(track.getTrackUrl())
                                                         .trackNumber(track.getTrackNumber())
                                                         .explicit(track.getExplicit())
                                                         .isrc(track.getIsrc())

@@ -86,9 +86,21 @@ public class AdminController {
         return ResponseEntity.ok(trackService.getAllTracks());
     }
 
+    @GetMapping("/tracks/{id}")
+    public ResponseEntity<BaseResponse<TrackResponse>> getTrack(@PathVariable Long id) {
+        return ResponseEntity.ok(trackService.getTrack(id));
+    }
+
     @PostMapping("/tracks")
     public ResponseEntity<BaseResponse<Void>> createTrack(@Valid @RequestBody TrackRequest request) {
         return ResponseEntity.ok(trackService.createTrack(request));
+    }
+
+    @PutMapping("/tracks/{id}")
+    public ResponseEntity<BaseResponse<Void>> updateTrack(
+            @PathVariable Long id,
+            @RequestBody TrackRequest request) {
+        return ResponseEntity.ok(trackService.updateTrack(id, request));
     }
 
     @DeleteMapping("/tracks/{id}")

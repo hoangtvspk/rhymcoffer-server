@@ -18,7 +18,6 @@ public class ArtistResponse {
     private String imageUrl;
     private String description;
     private Integer popularity;
-    private List<String> genres;
     private List<TrackResponse> tracks;
     private List<AlbumResponse> albums;
     private LocalDateTime createdAt;

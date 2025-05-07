@@ -14,10 +14,10 @@ public class TrackRequest {
     private String imageUrl;
     private Integer durationMs;
     private Integer popularity;
-    private String previewUrl;
+    private String trackUrl;
     private String trackNumber;
     private Boolean explicit;
     private String isrc;
     private Long albumId;
     private Set<Long> artistIds;
-} 
+}

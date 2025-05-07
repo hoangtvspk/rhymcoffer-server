@@ -31,7 +31,7 @@ public class Track {
     private String imageUrl;
     private Integer durationMs;
     private Integer popularity;
-    private String previewUrl;
+    private String trackUrl;
     private String trackNumber;
     private Boolean explicit;
     private String isrc;
@@ -41,22 +41,14 @@ public class Track {
     private Album album;
 
     @ManyToMany
-    @JoinTable(
-        name = "track_artists",
-        joinColumns = @JoinColumn(name = "track_id"),
-        inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
+    @JoinTable(name = "track_artists", joinColumns = @JoinColumn(name = "track_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
     private Set<Artist> artists = new HashSet<>();
 
     @ManyToMany(mappedBy = "tracks")
     private Set<Playlist> playlists = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "user_saved_tracks",
-        joinColumns = @JoinColumn(name = "track_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "user_saved_tracks", joinColumns = @JoinColumn(name = "track_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> savedByUsers = new HashSet<>();
 
     @CreatedDate
@@ -64,4 +56,4 @@ public class Track {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-} 
+}
