@@ -71,7 +71,6 @@ public class SecurityConfig {
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://localhost:8000");
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedHeader("*");
