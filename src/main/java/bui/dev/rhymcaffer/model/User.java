@@ -39,50 +39,39 @@ public class User {
     private String imageUrl;
     private String bio;
 
+    // Users who follow this user
     @ManyToMany
-    @JoinTable(
-        name = "user_following",
-        joinColumns = @JoinColumn(name = "follower_id"),
-        inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
-    private Set<User> following = new HashSet<>();
-
-    @ManyToMany(mappedBy = "following")
+    @JoinTable(name = "user_followers", joinColumns = @JoinColumn(name = "following_id"), inverseJoinColumns = @JoinColumn(name = "follower_id"))
+    @Builder.Default
     private Set<User> followers = new HashSet<>();
 
+    // Users this user is following
+    @ManyToMany(mappedBy = "followers")
+    @Builder.Default
+    private Set<User> following = new HashSet<>();
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "owner")
+    @Builder.Default
     private Set<Playlist> playlists = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "user_saved_tracks",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "track_id")
-    )
+    @JoinTable(name = "user_saved_tracks", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "track_id"))
+    @Builder.Default
     private Set<Track> savedTracks = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "user_saved_albums",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "album_id")
-    )
+    @JoinTable(name = "user_saved_albums", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "album_id"))
+    @Builder.Default
     private Set<Album> savedAlbums = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "user_followed_artists",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
+    @JoinTable(name = "user_followed_artists", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
+    @Builder.Default
     private Set<Artist> followedArtists = new HashSet<>();
 
     @CreatedDate
@@ -90,4 +79,4 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-} 
+}

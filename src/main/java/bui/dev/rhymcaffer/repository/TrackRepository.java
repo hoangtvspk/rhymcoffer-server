@@ -11,16 +11,27 @@ import java.util.List;
 @Repository
 public interface TrackRepository extends JpaRepository<Track, Long> {
     List<Track> findByNameContainingIgnoreCase(String name);
-    
+
     @Query("SELECT t FROM Track t JOIN t.artists a WHERE a.id = :artistId")
     List<Track> findByArtistId(@Param("artistId") Long artistId);
-    
+
     @Query("SELECT t FROM Track t WHERE t.album.id = :albumId")
     List<Track> findByAlbumId(@Param("albumId") Long albumId);
-    
+
     @Query("SELECT t FROM Track t JOIN t.savedByUsers u WHERE u.id = :userId")
     List<Track> findSavedTracks(@Param("userId") Long userId);
-    
+
     @Query("SELECT t FROM Track t WHERE t.popularity >= :minPopularity ORDER BY t.popularity DESC")
     List<Track> findPopularTracks(@Param("minPopularity") int minPopularity);
-} 
+
+    List<Track> findByArtists_Id(Long artistId);
+
+    List<Track> findByAlbum_Id(Long albumId);
+
+    List<Track> findByPopularityGreaterThanEqual(int minPopularity);
+
+    List<Track> findBySavedByUsers_Id(Long userId);
+
+    @Query("SELECT t FROM Track t JOIN FETCH t.artists WHERE t.id = :id")
+    Track findByIdWithArtists(@Param("id") Long id);
+}

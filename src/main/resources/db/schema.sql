@@ -67,6 +67,15 @@ CREATE TABLE albums (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Create album_artists table (Many-to-Many relationship between albums and artists)
+CREATE TABLE album_artists (
+    album_id BIGINT,
+    artist_id BIGINT,
+    PRIMARY KEY (album_id, artist_id),
+    FOREIGN KEY (album_id) REFERENCES albums(id),
+    FOREIGN KEY (artist_id) REFERENCES artists(id)
+);
+
 -- Create playlists table
 CREATE TABLE playlists (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -88,7 +97,7 @@ CREATE TABLE tracks (
     image_url VARCHAR(255),
     duration_ms INT,
     popularity INT DEFAULT 0,
-    preview_url VARCHAR(255),
+    track_url VARCHAR(255),
     track_number VARCHAR(10),
     explicit BOOLEAN DEFAULT FALSE,
     isrc VARCHAR(20),
@@ -100,8 +109,8 @@ CREATE TABLE tracks (
 
 -- Create track_artists table (Many-to-Many relationship between tracks and artists)
 CREATE TABLE track_artists (
-    track_id BIGINT,
-    artist_id BIGINT,
+    track_id BIGINT NOT NULL,
+    artist_id BIGINT NOT NULL,
     PRIMARY KEY (track_id, artist_id),
     FOREIGN KEY (track_id) REFERENCES tracks(id),
     FOREIGN KEY (artist_id) REFERENCES artists(id)
@@ -166,4 +175,24 @@ CREATE TABLE user_saved_tracks (
     PRIMARY KEY (user_id, track_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (track_id) REFERENCES tracks(id)
+);
+
+-- Create artist_followers table (Many-to-Many relationship between artists and users who follow them)
+CREATE TABLE artist_followers (
+    artist_id BIGINT,
+    user_id BIGINT,
+    followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (artist_id, user_id),
+    FOREIGN KEY (artist_id) REFERENCES artists(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Create album_followers table (Many-to-Many relationship between albums and users who follow them)
+CREATE TABLE album_followers (
+    album_id BIGINT,
+    user_id BIGINT,
+    followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (album_id, user_id),
+    FOREIGN KEY (album_id) REFERENCES albums(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 ); 

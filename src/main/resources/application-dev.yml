@@ -2,10 +2,13 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: rhymcaffer
   datasource:
-    url: jdbc:mysql://localhost:3306/rhymcaffer?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-    username: root
-    password: Hoang1503@
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,12 +17,20 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        jdbc:
+          time_zone: UTC
 
 jwt:
-  secret: your-secret-key-here-must-be-at-least-256-bits-long
+  secret: ${JWT_SECRET:test-secret}
   expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
 
 logging:
   level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.security: DEBUG
     bui.dev.rhymcaffer: DEBUG
+    org.springframework.jdbc: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.engine.jdbc: DEBUG

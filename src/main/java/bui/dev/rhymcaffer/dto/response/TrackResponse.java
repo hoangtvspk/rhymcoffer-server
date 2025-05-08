@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,14 +19,13 @@ public class TrackResponse {
     private String imageUrl;
     private Integer durationMs;
     private Integer popularity;
-    private String previewUrl;
+    private String trackUrl;
     private String trackNumber;
     private Boolean explicit;
     private String isrc;
     private Long albumId;
     private Set<Long> artistIds;
-    private Set<Long> playlistIds;
-    private Set<Long> savedByUserIds;
+    private List<ArtistResponse> artists;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-} 
+}

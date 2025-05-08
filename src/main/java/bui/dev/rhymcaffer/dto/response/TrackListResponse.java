@@ -6,20 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ArtistResponse {
+public class TrackListResponse {
     private Long id;
     private String name;
     private String imageUrl;
-    private String description;
+    private Integer durationMs;
     private Integer popularity;
-    private List<TrackResponse> tracks;
-    private List<AlbumResponse> albums;
+    private String trackUrl;
+    private String trackNumber;
+    private Boolean explicit;
+    private String isrc;
+    private Long albumId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

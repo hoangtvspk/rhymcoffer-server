@@ -13,5 +13,4 @@ public class ArtistRequest {
     private String imageUrl;
     private String description;
     private Integer popularity;
-    private List<String> genres;
 } 
