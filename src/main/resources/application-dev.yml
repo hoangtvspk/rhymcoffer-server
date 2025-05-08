@@ -31,3 +31,6 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.security: DEBUG
     bui.dev.rhymcaffer: DEBUG
+    org.springframework.jdbc: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.engine.jdbc: DEBUG
