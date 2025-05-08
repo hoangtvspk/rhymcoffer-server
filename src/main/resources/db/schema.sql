@@ -109,8 +109,8 @@ CREATE TABLE tracks (
 
 -- Create track_artists table (Many-to-Many relationship between tracks and artists)
 CREATE TABLE track_artists (
-    track_id BIGINT,
-    artist_id BIGINT,
+    track_id BIGINT NOT NULL,
+    artist_id BIGINT NOT NULL,
     PRIMARY KEY (track_id, artist_id),
     FOREIGN KEY (track_id) REFERENCES tracks(id),
     FOREIGN KEY (artist_id) REFERENCES artists(id)

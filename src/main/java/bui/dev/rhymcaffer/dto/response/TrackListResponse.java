@@ -6,14 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrackResponse {
+public class TrackListResponse {
     private Long id;
     private String name;
     private String imageUrl;
@@ -24,8 +22,6 @@ public class TrackResponse {
     private Boolean explicit;
     private String isrc;
     private Long albumId;
-    private Set<Long> artistIds;
-    private List<ArtistResponse> artists;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -59,6 +59,14 @@ public class AdminController {
         return ResponseEntity.ok(artistService.createArtist(request));
     }
 
+    @GetMapping("/artists/{id}")
+    public ResponseEntity<BaseResponse<ArtistResponse>> getArtist(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean expandAlbums,
+            @RequestParam(defaultValue = "false") boolean expandTracks) {
+        return ResponseEntity.ok(artistService.getArtist(id, expandAlbums, expandTracks));
+    }
+
     @DeleteMapping("/artists/{id}")
     public ResponseEntity<BaseResponse<Void>> deleteArtist(@PathVariable Long id) {
         return ResponseEntity.ok(artistService.deleteArtist(id));
@@ -68,6 +76,11 @@ public class AdminController {
     @GetMapping("/albums")
     public ResponseEntity<BaseResponse<List<AlbumResponse>>> getAllAlbums() {
         return ResponseEntity.ok(albumService.getAllAlbums());
+    }
+
+    @GetMapping("/albums/{id}")
+    public ResponseEntity<BaseResponse<AlbumResponse>> getAlbum(@PathVariable Long id) {
+        return ResponseEntity.ok(albumService.getAlbum(id));
     }
 
     @PostMapping("/albums")
@@ -82,7 +95,7 @@ public class AdminController {
 
     // Track Management
     @GetMapping("/tracks")
-    public ResponseEntity<BaseResponse<List<TrackResponse>>> getAllTracks() {
+    public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks() {
         return ResponseEntity.ok(trackService.getAllTracks());
     }
 

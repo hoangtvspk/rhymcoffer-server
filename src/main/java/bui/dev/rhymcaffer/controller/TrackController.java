@@ -3,6 +3,7 @@ package bui.dev.rhymcaffer.controller;
 import bui.dev.rhymcaffer.dto.request.TrackRequest;
 import bui.dev.rhymcaffer.dto.response.BaseResponse;
 import bui.dev.rhymcaffer.dto.response.TrackResponse;
+import bui.dev.rhymcaffer.dto.response.TrackListResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.TrackService;
 import jakarta.validation.Valid;
@@ -31,7 +32,7 @@ public class TrackController {
         }
 
         @GetMapping
-        public ResponseEntity<BaseResponse<List<TrackResponse>>> getAllTracks() {
+        public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks() {
                 return ResponseEntity.ok(trackService.getAllTracks());
         }
 

@@ -2,13 +2,16 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: rhymcaffer
   datasource:
-    url: jdbc:mysql://localhost:3306/rhymcaffer?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&verifyServerCertificate=false
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/rhymcaffer?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&verifyServerCertificate=false}
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:test-password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -20,8 +23,11 @@ spring:
 jwt:
   secret: ${JWT_SECRET:test-secret}
   expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
 
 logging:
   level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.security: DEBUG
     bui.dev.rhymcaffer: DEBUG

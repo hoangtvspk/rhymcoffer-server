@@ -31,4 +31,7 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
     List<Track> findByPopularityGreaterThanEqual(int minPopularity);
 
     List<Track> findBySavedByUsers_Id(Long userId);
+
+    @Query("SELECT t FROM Track t JOIN FETCH t.artists WHERE t.id = :id")
+    Track findByIdWithArtists(@Param("id") Long id);
 }
