@@ -1,11 +1,8 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.track.ArtistForTrackResponse;
-import bui.dev.rhymcaffer.dto.track.TrackRequest;
+import bui.dev.rhymcaffer.dto.track.*;
 import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
 import bui.dev.rhymcaffer.dto.common.BaseResponse;
-import bui.dev.rhymcaffer.dto.track.TrackResponse;
-import bui.dev.rhymcaffer.dto.track.TrackListResponse;
 import bui.dev.rhymcaffer.model.*;
 import bui.dev.rhymcaffer.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -410,11 +407,11 @@ public class TrackService {
                                 .trackNumber(track.getTrackNumber())
                                 .explicit(track.getExplicit())
                                 .isrc(track.getIsrc())
-                                .albumId(track.getAlbum() != null ? track.getAlbum().getId() : null)
-                                .artistIds(track.getArtists() != null ? track.getArtists().stream()
-                                                .map(Artist::getId)
-                                                .collect(Collectors.toSet()) : null)
-
+                                .album(AlbumForTrackResponse.builder()
+                                        .id(track.getAlbum().getId())
+                                        .name(track.getAlbum().getName())
+                                        .imageUrl(track.getAlbum().getImageUrl())
+                                        .build())
                                 .createdAt(track.getCreatedAt())
                                 .updatedAt(track.getUpdatedAt())
                                 .build();

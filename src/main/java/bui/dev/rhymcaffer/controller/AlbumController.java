@@ -2,6 +2,7 @@ package bui.dev.rhymcaffer.controller;
 
 import bui.dev.rhymcaffer.dto.album.AlbumRequest;
 import bui.dev.rhymcaffer.dto.album.AlbumResponse;
+import bui.dev.rhymcaffer.dto.album.TrackForAlbumResponse;
 import bui.dev.rhymcaffer.dto.common.BaseResponse;
 import bui.dev.rhymcaffer.dto.track.TrackResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
@@ -81,7 +82,7 @@ public class AlbumController {
         }
 
         @GetMapping("/{albumId}/tracks")
-        public ResponseEntity<BaseResponse<List<TrackResponse>>> getAlbumTracks(@PathVariable Long albumId) {
+        public ResponseEntity<BaseResponse<List<TrackForAlbumResponse>>> getAlbumTracks(@PathVariable Long albumId) {
                 return ResponseEntity.ok(albumService.getAlbumTracks(albumId));
         }
 

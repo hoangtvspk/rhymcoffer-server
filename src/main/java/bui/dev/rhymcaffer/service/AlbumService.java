@@ -349,12 +349,12 @@ public class AlbumService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<List<TrackResponse>> getAlbumTracks(Long albumId) {
+        public BaseResponse<List<TrackForAlbumResponse>> getAlbumTracks(Long albumId) {
                 try {
                         Album album = albumRepository.findById(albumId)
                                         .orElseThrow(() -> new RuntimeException("Album not found"));
-                        List<TrackResponse> tracks = album.getTracks().stream()
-                                        .map(track -> TrackResponse.builder()
+                        List<TrackForAlbumResponse> tracks = album.getTracks().stream()
+                                        .map(track -> TrackForAlbumResponse.builder()
                                                         .id(track.getId())
                                                         .name(track.getName())
                                                         .imageUrl(track.getImageUrl())
@@ -364,22 +364,19 @@ public class AlbumService {
                                                         .trackNumber(track.getTrackNumber())
                                                         .explicit(track.getExplicit())
                                                         .isrc(track.getIsrc())
-                                                        .albumId(albumId)
-                                                        .artistIds(track.getArtists().stream()
-                                                                        .map(Artist::getId)
-                                                                        .collect(Collectors.toSet()))
+
                                                         .createdAt(track.getCreatedAt())
                                                         .updatedAt(track.getUpdatedAt())
                                                         .build())
                                         .toList();
-                        return BaseResponse.<List<TrackResponse>>builder()
+                        return BaseResponse.<List<TrackForAlbumResponse>>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Success")
                                         .data(tracks)
                                         .build();
                 } catch (RuntimeException e) {
-                        return BaseResponse.<List<TrackResponse>>builder()
+                        return BaseResponse.<List<TrackForAlbumResponse>>builder()
                                         .statusCode(404)
                                         .isSuccess(false)
                                         .message(e.getMessage())
