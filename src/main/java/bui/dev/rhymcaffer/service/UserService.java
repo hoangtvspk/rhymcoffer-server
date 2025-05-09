@@ -1,9 +1,9 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.request.UserRequest;
-import bui.dev.rhymcaffer.dto.request.UserUpdateRequest;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.UserResponse;
+import bui.dev.rhymcaffer.dto.user.UserRequest;
+import bui.dev.rhymcaffer.dto.user.UserUpdateRequest;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.user.UserResponse;
 import bui.dev.rhymcaffer.model.User;
 import bui.dev.rhymcaffer.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

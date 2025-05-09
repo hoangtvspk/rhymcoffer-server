@@ -1,16 +1,18 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.request.TrackRequest;
-import bui.dev.rhymcaffer.dto.response.ArtistResponse;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.TrackResponse;
-import bui.dev.rhymcaffer.dto.response.TrackListResponse;
+import bui.dev.rhymcaffer.dto.track.ArtistForTrackResponse;
+import bui.dev.rhymcaffer.dto.track.TrackRequest;
+import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.track.TrackResponse;
+import bui.dev.rhymcaffer.dto.track.TrackListResponse;
 import bui.dev.rhymcaffer.model.*;
 import bui.dev.rhymcaffer.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ public class TrackService {
         private final AlbumRepository albumRepository;
         private final ArtistRepository artistRepository;
         private final UserRepository userRepository;
+        private final PlaylistRepository playlistRepository;
 
         @Transactional
         public BaseResponse<Void> createTrack(TrackRequest request) {
@@ -72,8 +75,8 @@ public class TrackService {
         @Transactional(readOnly = true)
         public BaseResponse<TrackResponse> getTrack(Long id) {
                 try {
-                        Track track = trackRepository.findByIdWithArtists(id);
-                        System.out.println("track: " + track);
+                        Track track = trackRepository.findTrackById(id);
+
                         if (track == null) {
                                 return BaseResponse.<TrackResponse>builder()
                                                 .statusCode(404)
@@ -82,9 +85,6 @@ public class TrackService {
                                                 .build();
                         }
                         TrackResponse response = mapToResponse(track);
-                        System.out.println("track.getArtists(): " + track.getArtists());
-                        track.getArtists().forEach(
-                                        a -> System.out.println("Artist ID: " + a.getId() + ", Name: " + a.getName()));
                         return BaseResponse.<TrackResponse>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
@@ -357,6 +357,31 @@ public class TrackService {
                 }
         }
 
+        // add track to playlist
+        @Transactional
+        public BaseResponse<Void> addToPlaylist(Long trackId, Long playlistId) {
+                try {
+                        Track track = trackRepository.findById(trackId)
+                                        .orElseThrow(() -> new RuntimeException("Track not found"));
+                        Playlist playlist = playlistRepository.findById(playlistId)
+                                        .orElseThrow(() -> new RuntimeException("Playlist not found"));
+
+                        playlist.getTracks().add(track);
+                        playlistRepository.save(playlist);
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(200)
+                                        .isSuccess(true)
+                                        .message("Track added to playlist successfully")
+                                        .build();
+                } catch (Exception e) {
+                        return BaseResponse.<Void>builder()
+                                        .statusCode(400)
+                                        .isSuccess(false)
+                                        .message(e.getMessage())
+                                        .build();
+                }
+        }
+
         private TrackListResponse mapToListResponse(Track track) {
                 return TrackListResponse.builder()
                                 .id(track.getId())
@@ -375,7 +400,7 @@ public class TrackService {
         }
 
         private TrackResponse mapToResponse(Track track) {
-                return TrackResponse.builder()
+                TrackResponse trackResponse = TrackResponse.builder()
                                 .id(track.getId())
                                 .name(track.getName())
                                 .imageUrl(track.getImageUrl())
@@ -389,19 +414,22 @@ public class TrackService {
                                 .artistIds(track.getArtists() != null ? track.getArtists().stream()
                                                 .map(Artist::getId)
                                                 .collect(Collectors.toSet()) : null)
-                                .artists(track.getArtists() != null ? track.getArtists().stream()
-                                                .map(artist -> ArtistResponse.builder()
-                                                                .id(artist.getId())
-                                                                .name(artist.getName())
-                                                                .imageUrl(artist.getImageUrl())
-                                                                .description(artist.getDescription())
-                                                                .popularity(artist.getPopularity())
-                                                                .createdAt(artist.getCreatedAt())
-                                                                .updatedAt(artist.getUpdatedAt())
-                                                                .build())
-                                                .collect(Collectors.toList()) : null)
+
                                 .createdAt(track.getCreatedAt())
                                 .updatedAt(track.getUpdatedAt())
                                 .build();
+
+                List<ArtistForTrackResponse> artists = new ArrayList<>();
+                if (track.getArtists() != null) {
+                        artists = track.getArtists().stream()
+                                        .map(artist -> ArtistForTrackResponse.builder()
+                                                        .id(artist.getId())
+                                                        .name(artist.getName())
+                                                        .imageUrl(artist.getImageUrl())
+                                                        .build())
+                                        .collect(Collectors.toList());
+                }
+                trackResponse.setArtists(artists);
+                return trackResponse;
         }
 }

@@ -1,10 +1,11 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.request.ArtistRequest;
-import bui.dev.rhymcaffer.dto.response.AlbumResponse;
-import bui.dev.rhymcaffer.dto.response.ArtistResponse;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.TrackResponse;
+import bui.dev.rhymcaffer.dto.album.TrackForAlbumResponse;
+import bui.dev.rhymcaffer.dto.artist.*;
+import bui.dev.rhymcaffer.dto.album.AlbumResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.track.TrackResponse;
+import bui.dev.rhymcaffer.model.Album;
 import bui.dev.rhymcaffer.model.Artist;
 import bui.dev.rhymcaffer.model.User;
 import bui.dev.rhymcaffer.repository.ArtistRepository;
@@ -13,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,6 @@ public class ArtistService {
                                         .popularity(request.getPopularity())
                                         .build();
 
-
                         artistRepository.save(artist);
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)
@@ -51,11 +51,17 @@ public class ArtistService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<ArtistResponse> getArtist(Long id, boolean expandAlbums, boolean expandTracks) {
+        public BaseResponse<ArtistResponse> getArtist(Long id) {
                 try {
-                        Artist artist = artistRepository.findById(id)
-                                        .orElseThrow(() -> new RuntimeException("Artist not found"));
-                        ArtistResponse response = mapToResponse(artist, expandAlbums, expandTracks);
+                        Artist artist = artistRepository.findArtistById(id);
+                        if (artist == null) {
+                                return BaseResponse.<ArtistResponse>builder()
+                                                .statusCode(404)
+                                                .isSuccess(false)
+                                                .message("Artist not found")
+                                                .build();
+                        }
+                        ArtistResponse response = mapToResponse(artist);
                         return BaseResponse.<ArtistResponse>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
@@ -72,20 +78,20 @@ public class ArtistService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<List<ArtistResponse>> getAllArtists() {
+        public BaseResponse<List<ArtistListResponse>> getAllArtists() {
                 try {
                         List<Artist> artists = artistRepository.findAll();
-                        List<ArtistResponse> responses = artists.stream()
-                                        .map(artist -> mapToResponse(artist, false, false))
+                        List<ArtistListResponse> responses = artists.stream()
+                                        .map(this::mapToListResponse)
                                         .toList();
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Success")
                                         .data(responses)
                                         .build();
                 } catch (Exception e) {
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(500)
                                         .isSuccess(false)
                                         .message("Failed to retrieve artists: " + e.getMessage())
@@ -94,20 +100,20 @@ public class ArtistService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<List<ArtistResponse>> searchArtists(String name) {
+        public BaseResponse<List<ArtistListResponse>> searchArtists(String name) {
                 try {
                         List<Artist> artists = artistRepository.findByNameContainingIgnoreCase(name);
-                        List<ArtistResponse> responses = artists.stream()
-                                        .map(artist -> mapToResponse(artist, false, false))
+                        List<ArtistListResponse> responses = artists.stream()
+                                        .map(this::mapToListResponse)
                                         .toList();
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Success")
                                         .data(responses)
                                         .build();
                 } catch (Exception e) {
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(400)
                                         .isSuccess(false)
                                         .message("Search failed: " + e.getMessage())
@@ -116,20 +122,20 @@ public class ArtistService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<List<ArtistResponse>> getPopularArtists(int minPopularity) {
+        public BaseResponse<List<ArtistListResponse>> getPopularArtists(int minPopularity) {
                 try {
                         List<Artist> artists = artistRepository.findPopularArtists(minPopularity);
-                        List<ArtistResponse> responses = artists.stream()
-                                        .map(artist -> mapToResponse(artist, false, false))
+                        List<ArtistListResponse> responses = artists.stream()
+                                        .map(this::mapToListResponse)
                                         .toList();
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
                                         .message("Success")
                                         .data(responses)
                                         .build();
                 } catch (Exception e) {
-                        return BaseResponse.<List<ArtistResponse>>builder()
+                        return BaseResponse.<List<ArtistListResponse>>builder()
                                         .statusCode(400)
                                         .isSuccess(false)
                                         .message("Failed to get popular artists: " + e.getMessage())
@@ -236,65 +242,58 @@ public class ArtistService {
                 }
         }
 
-        private ArtistResponse mapToResponse(Artist artist, boolean expandAlbums, boolean expandTracks) {
+        private ArtistResponse mapToResponse(Artist artist) {
                 ArtistResponse.ArtistResponseBuilder builder = ArtistResponse.builder()
                                 .id(artist.getId())
                                 .name(artist.getName())
                                 .imageUrl(artist.getImageUrl())
                                 .description(artist.getDescription())
+                                .tracks(artist.getTracks() != null ? artist.getTracks().stream()
+                                        .map(track -> TrackForArtistResponse.builder()
+                                                .id(track.getId())
+                                                .name(track.getName())
+                                                .imageUrl(track.getImageUrl())
+                                                .durationMs(track.getDurationMs())
+                                                .popularity(track.getPopularity())
+                                                .trackUrl(track.getTrackUrl())
+                                                .trackNumber(track.getTrackNumber())
+                                                .explicit(track.getExplicit())
+                                                .isrc(track.getIsrc())
+                                                .createdAt(track.getCreatedAt())
+                                                .updatedAt(track.getUpdatedAt())
+                                                .build())
+                                        .collect(Collectors.toList()) : new ArrayList<>())
+                                .albums(artist.getAlbums() != null ? artist.getAlbums().stream()
+                                        .map(album -> AlbumForArtistResponse.builder()
+                                                .id(album.getId())
+                                                .name(album.getName())
+                                                .imageUrl(album.getImageUrl())
+                                                .description(album.getDescription())
+                                                .popularity(album.getPopularity())
+                                                .releaseDate(album.getReleaseDate())
+                                                .albumType(album.getAlbumType())
+                                                .createdAt(album.getCreatedAt())
+                                                .updatedAt(album.getUpdatedAt())
+                                                .build())
+                                        .collect(Collectors.toList()) : new ArrayList<>())
                                 .popularity(artist.getPopularity())
                                 .createdAt(artist.getCreatedAt())
                                 .updatedAt(artist.getUpdatedAt());
 
-                if (expandTracks) {
-                        builder.tracks(artist.getTracks() == null ? List.of()
-                                        : artist.getTracks().stream()
-                                                        .map(track -> TrackResponse.builder()
-                                                                        .id(track.getId())
-                                                                        .name(track.getName())
-                                                                        .imageUrl(track.getImageUrl())
-                                                                        .durationMs(track.getDurationMs())
-                                                                        .popularity(track.getPopularity())
-                                                                        .trackUrl(track.getTrackUrl())
-                                                                        .trackNumber(track.getTrackNumber())
-                                                                        .explicit(track.getExplicit())
-                                                                        .isrc(track.getIsrc())
-                                                                        .albumId(track.getAlbum() != null
-                                                                                        ? track.getAlbum().getId()
-                                                                                        : null)
-                                                                        .artistIds(track.getArtists().stream()
-                                                                                        .map(a -> a.getId())
-                                                                                        .collect(Collectors.toSet()))
-                                                                        .createdAt(track.getCreatedAt())
-                                                                        .updatedAt(track.getUpdatedAt())
-                                                                        .build())
-                                                        .collect(Collectors.toList()));
-                }
-                if (expandAlbums) {
-                        builder.albums(artist.getAlbums() == null ? List.of()
-                                        : artist.getAlbums().stream()
-                                                        .map(album -> AlbumResponse.builder()
-                                                                        .id(album.getId())
-                                                                        .name(album.getName())
-                                                                        .imageUrl(album.getImageUrl())
-                                                                        .description(album.getDescription())
-                                                                        .popularity(album.getPopularity())
-                                                                        .releaseDate(album.getReleaseDate())
-                                                                        .albumType(album.getAlbumType())
-                                                                        .artistIds(album.getArtists().stream()
-                                                                                        .map(a -> a.getId())
-                                                                                        .collect(Collectors.toSet()))
-                                                                        .trackIds(album.getTracks().stream()
-                                                                                        .map(t -> t.getId())
-                                                                                        .collect(Collectors.toSet()))
-                                                                        .followerIds(album.getFollowers().stream()
-                                                                                        .map(u -> u.getId())
-                                                                                        .collect(Collectors.toSet()))
-                                                                        .createdAt(album.getCreatedAt())
-                                                                        .updatedAt(album.getUpdatedAt())
-                                                                        .build())
-                                                        .collect(Collectors.toList()));
-                }
+
+
+                return builder.build();
+        }
+
+        private ArtistListResponse mapToListResponse(Artist artist) {
+                ArtistListResponse.ArtistListResponseBuilder builder = ArtistListResponse.builder()
+                        .id(artist.getId())
+                        .name(artist.getName())
+                        .imageUrl(artist.getImageUrl())
+                        .description(artist.getDescription())
+                        .popularity(artist.getPopularity())
+                        .createdAt(artist.getCreatedAt())
+                        .updatedAt(artist.getUpdatedAt());
                 return builder.build();
         }
 }

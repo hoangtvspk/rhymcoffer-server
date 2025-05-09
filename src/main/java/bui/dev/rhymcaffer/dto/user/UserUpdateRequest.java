@@ -1,4 +1,4 @@
-package bui.dev.rhymcaffer.dto.request;
+package bui.dev.rhymcaffer.dto.user;
 
 import lombok.Data;
 

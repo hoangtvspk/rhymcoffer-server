@@ -1,4 +1,4 @@
-package bui.dev.rhymcaffer.dto.request;
+package bui.dev.rhymcaffer.dto.playlist;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

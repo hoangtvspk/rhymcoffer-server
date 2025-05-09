@@ -1,12 +1,11 @@
 package bui.dev.rhymcaffer.controller;
 
-import bui.dev.rhymcaffer.dto.request.UserRequest;
-import bui.dev.rhymcaffer.dto.request.UserUpdateRequest;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.UserResponse;
+import bui.dev.rhymcaffer.dto.user.UserRequest;
+import bui.dev.rhymcaffer.dto.user.UserUpdateRequest;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.user.UserResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

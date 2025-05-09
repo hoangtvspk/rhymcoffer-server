@@ -32,6 +32,6 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
 
     List<Track> findBySavedByUsers_Id(Long userId);
 
-    @Query("SELECT t FROM Track t JOIN FETCH t.artists WHERE t.id = :id")
-    Track findByIdWithArtists(@Param("id") Long id);
+    @Query("SELECT t FROM Track t LEFT JOIN FETCH t.artists WHERE t.id = :id")
+    Track findTrackById(@Param("id") Long id);
 }

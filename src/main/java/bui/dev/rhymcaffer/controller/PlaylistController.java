@@ -1,11 +1,10 @@
 package bui.dev.rhymcaffer.controller;
 
-import bui.dev.rhymcaffer.dto.request.PlaylistRequest;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.PlaylistResponse;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistRequest;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.PlaylistService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -60,19 +59,18 @@ public class PlaylistController {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
 
-
-    @PostMapping("/{playlistId}/tracks/{trackId}")
-    public ResponseEntity<BaseResponse<Void>> addTrackToPlaylist(
+    @PostMapping("/{playlistId}/tracks")
+    public ResponseEntity<BaseResponse<Void>> addTracksToPlaylist(
             @PathVariable Long playlistId,
-            @PathVariable Long trackId) {
-        return ResponseEntity.ok(playlistService.addTrackToPlaylist(playlistId, trackId));
+            @RequestBody List<Long> trackIds) {
+        return ResponseEntity.ok(playlistService.addTracksToPlaylist(playlistId, trackIds));
     }
 
-    @DeleteMapping("/{playlistId}/tracks/{trackId}")
-    public ResponseEntity<BaseResponse<Void>> removeTrackFromPlaylist(
+    @DeleteMapping("/{playlistId}/tracks")
+    public ResponseEntity<BaseResponse<Void>> removeTracksFromPlaylist(
             @PathVariable Long playlistId,
-            @PathVariable Long trackId) {
-        return ResponseEntity.ok(playlistService.removeTrackFromPlaylist(playlistId, trackId));
+            @RequestBody List<Long> trackIds) {
+        return ResponseEntity.ok(playlistService.removeTracksFromPlaylist(playlistId, trackIds));
     }
 
     @PostMapping("/{playlistId}/follow")

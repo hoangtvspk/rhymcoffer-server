@@ -1,9 +1,9 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.request.AuthenticationRequest;
-import bui.dev.rhymcaffer.dto.request.RegisterRequest;
-import bui.dev.rhymcaffer.dto.response.AuthenticationResponse;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
+import bui.dev.rhymcaffer.dto.authentication.AuthenticationRequest;
+import bui.dev.rhymcaffer.dto.authentication.RegisterRequest;
+import bui.dev.rhymcaffer.dto.authentication.AuthenticationResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
 import bui.dev.rhymcaffer.model.Role;
 import bui.dev.rhymcaffer.model.User;
 import bui.dev.rhymcaffer.repository.RoleRepository;

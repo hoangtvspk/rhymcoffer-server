@@ -1,5 +1,6 @@
-package bui.dev.rhymcaffer.dto.response;
+package bui.dev.rhymcaffer.dto.track;
 
+import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class TrackResponse {
     private String isrc;
     private Long albumId;
     private Set<Long> artistIds;
-    private List<ArtistResponse> artists;
+    private List<ArtistForTrackResponse> artists;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

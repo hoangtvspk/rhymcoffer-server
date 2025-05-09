@@ -25,4 +25,11 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
 
     List<Album> findByReleaseDateAfter(String date);
 
+    @Query("SELECT a FROM Album a " +
+            "LEFT JOIN FETCH a.artists " +
+            "LEFT JOIN FETCH a.tracks " +
+            "LEFT JOIN FETCH a.followers " +
+            "WHERE a.id = :id")
+    Album findAlbumById(@Param("id") Long id);
+
 }

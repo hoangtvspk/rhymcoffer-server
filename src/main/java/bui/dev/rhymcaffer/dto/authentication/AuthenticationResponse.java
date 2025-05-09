@@ -1,4 +1,4 @@
-package bui.dev.rhymcaffer.dto.response;
+package bui.dev.rhymcaffer.dto.authentication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

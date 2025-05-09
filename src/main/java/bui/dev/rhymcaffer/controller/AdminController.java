@@ -1,7 +1,19 @@
 package bui.dev.rhymcaffer.controller;
 
-import bui.dev.rhymcaffer.dto.request.*;
-import bui.dev.rhymcaffer.dto.response.*;
+import bui.dev.rhymcaffer.dto.album.AlbumRequest;
+import bui.dev.rhymcaffer.dto.album.AlbumResponse;
+import bui.dev.rhymcaffer.dto.artist.ArtistListResponse;
+import bui.dev.rhymcaffer.dto.artist.ArtistRequest;
+import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistRequest;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistResponse;
+import bui.dev.rhymcaffer.dto.track.TrackListResponse;
+import bui.dev.rhymcaffer.dto.track.TrackRequest;
+import bui.dev.rhymcaffer.dto.track.TrackResponse;
+import bui.dev.rhymcaffer.dto.user.UserRequest;
+import bui.dev.rhymcaffer.dto.user.UserResponse;
+import bui.dev.rhymcaffer.dto.user.UserUpdateRequest;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.*;
 import jakarta.validation.Valid;
@@ -50,7 +62,7 @@ public class AdminController {
 
     // Artist Management
     @GetMapping("/artists")
-    public ResponseEntity<BaseResponse<List<ArtistResponse>>> getAllArtists() {
+    public ResponseEntity<BaseResponse<List<ArtistListResponse>>> getAllArtists() {
         return ResponseEntity.ok(artistService.getAllArtists());
     }
 
@@ -61,10 +73,8 @@ public class AdminController {
 
     @GetMapping("/artists/{id}")
     public ResponseEntity<BaseResponse<ArtistResponse>> getArtist(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "false") boolean expandAlbums,
-            @RequestParam(defaultValue = "false") boolean expandTracks) {
-        return ResponseEntity.ok(artistService.getArtist(id, expandAlbums, expandTracks));
+            @PathVariable Long id) {
+        return ResponseEntity.ok(artistService.getArtist(id));
     }
 
     @DeleteMapping("/artists/{id}")

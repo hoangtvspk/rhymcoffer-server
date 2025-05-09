@@ -1,8 +1,8 @@
 package bui.dev.rhymcaffer.service;
 
-import bui.dev.rhymcaffer.dto.request.PlaylistRequest;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.PlaylistResponse;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistRequest;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.playlist.PlaylistResponse;
 import bui.dev.rhymcaffer.model.*;
 import bui.dev.rhymcaffer.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -182,22 +181,19 @@ public class PlaylistService {
                 }
         }
 
-
-
         @Transactional
-        public BaseResponse<Void> addTrackToPlaylist(Long playlistId, Long trackId) {
+        public BaseResponse<Void> addTracksToPlaylist(Long playlistId, List<Long> trackIds) {
                 try {
                         Playlist playlist = playlistRepository.findById(playlistId)
                                         .orElseThrow(() -> new RuntimeException("Playlist not found"));
-                        Track track = trackRepository.findById(trackId)
-                                        .orElseThrow(() -> new RuntimeException("Track not found"));
+                        List<Track> tracks = trackRepository.findAllById(trackIds);
 
-                        playlist.getTracks().add(track);
+                        playlist.getTracks().addAll(tracks);
                         playlistRepository.save(playlist);
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
-                                        .message("Track added to playlist successfully")
+                                        .message("Tracks added to playlist successfully")
                                         .build();
                 } catch (RuntimeException e) {
                         return BaseResponse.<Void>builder()
@@ -209,19 +205,18 @@ public class PlaylistService {
         }
 
         @Transactional
-        public BaseResponse<Void> removeTrackFromPlaylist(Long playlistId, Long trackId) {
+        public BaseResponse<Void> removeTracksFromPlaylist(Long playlistId, List<Long> trackIds) {
                 try {
                         Playlist playlist = playlistRepository.findById(playlistId)
                                         .orElseThrow(() -> new RuntimeException("Playlist not found"));
-                        Track track = trackRepository.findById(trackId)
-                                        .orElseThrow(() -> new RuntimeException("Track not found"));
+                        List<Track> tracks = trackRepository.findAllById(trackIds);
 
-                        playlist.getTracks().remove(track);
+                        playlist.getTracks().removeAll(tracks);
                         playlistRepository.save(playlist);
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
-                                        .message("Track removed from playlist successfully")
+                                        .message("Tracks removed from playlist successfully")
                                         .build();
                 } catch (RuntimeException e) {
                         return BaseResponse.<Void>builder()

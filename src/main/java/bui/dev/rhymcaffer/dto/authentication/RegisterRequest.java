@@ -1,4 +1,4 @@
-package bui.dev.rhymcaffer.dto.request;
+package bui.dev.rhymcaffer.dto.authentication;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

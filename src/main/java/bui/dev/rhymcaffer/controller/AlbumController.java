@@ -1,12 +1,11 @@
 package bui.dev.rhymcaffer.controller;
 
-import bui.dev.rhymcaffer.dto.request.AlbumRequest;
-import bui.dev.rhymcaffer.dto.response.AlbumResponse;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
-import bui.dev.rhymcaffer.dto.response.TrackResponse;
+import bui.dev.rhymcaffer.dto.album.AlbumRequest;
+import bui.dev.rhymcaffer.dto.album.AlbumResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.track.TrackResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.AlbumService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -67,18 +66,18 @@ public class AlbumController {
                 return ResponseEntity.ok(albumService.unsaveAlbum(albumId, userId));
         }
 
-        @PostMapping("/{albumId}/tracks/{trackId}")
-        public ResponseEntity<BaseResponse<Void>> addTrackToAlbum(
+        @PostMapping("/{albumId}/tracks")
+        public ResponseEntity<BaseResponse<Void>> addTracksToAlbum(
                         @PathVariable Long albumId,
-                        @PathVariable Long trackId) {
-                return ResponseEntity.ok(albumService.addTrackToAlbum(albumId, trackId));
+                        @RequestBody List<Long> trackIds) {
+                return ResponseEntity.ok(albumService.addTracksToAlbum(albumId, trackIds));
         }
 
-        @DeleteMapping("/{albumId}/tracks/{trackId}")
-        public ResponseEntity<BaseResponse<Void>> removeTrackFromAlbum(
+        @DeleteMapping("/{albumId}/tracks")
+        public ResponseEntity<BaseResponse<Void>> removeTracksFromAlbum(
                         @PathVariable Long albumId,
-                        @PathVariable Long trackId) {
-                return ResponseEntity.ok(albumService.removeTrackFromAlbum(albumId, trackId));
+                        @RequestBody List<Long> trackIds) {
+                return ResponseEntity.ok(albumService.removeTracksFromAlbum(albumId, trackIds));
         }
 
         @GetMapping("/{albumId}/tracks")

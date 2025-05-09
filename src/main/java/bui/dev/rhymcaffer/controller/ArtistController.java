@@ -1,11 +1,11 @@
 package bui.dev.rhymcaffer.controller;
 
-import bui.dev.rhymcaffer.dto.request.ArtistRequest;
-import bui.dev.rhymcaffer.dto.response.ArtistResponse;
-import bui.dev.rhymcaffer.dto.response.BaseResponse;
+import bui.dev.rhymcaffer.dto.artist.ArtistListResponse;
+import bui.dev.rhymcaffer.dto.artist.ArtistRequest;
+import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
+import bui.dev.rhymcaffer.dto.common.BaseResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.ArtistService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,24 +27,22 @@ public class ArtistController {
 
         @GetMapping("/{id}")
         public ResponseEntity<BaseResponse<ArtistResponse>> getArtist(
-                        @PathVariable Long id,
-                        @RequestParam(defaultValue = "false") boolean expandAlbums,
-                        @RequestParam(defaultValue = "false") boolean expandTracks) {
-                return ResponseEntity.ok(artistService.getArtist(id, expandAlbums, expandTracks));
+                        @PathVariable Long id) {
+                return ResponseEntity.ok(artistService.getArtist(id));
         }
 
         @GetMapping
-        public ResponseEntity<BaseResponse<List<ArtistResponse>>> getAllArtists() {
+        public ResponseEntity<BaseResponse<List<ArtistListResponse>>> getAllArtists() {
                 return ResponseEntity.ok(artistService.getAllArtists());
         }
 
         @GetMapping("/search")
-        public ResponseEntity<BaseResponse<List<ArtistResponse>>> searchArtists(@RequestParam String name) {
+        public ResponseEntity<BaseResponse<List<ArtistListResponse>>> searchArtists(@RequestParam String name) {
                 return ResponseEntity.ok(artistService.searchArtists(name));
         }
 
         @GetMapping("/popular")
-        public ResponseEntity<BaseResponse<List<ArtistResponse>>> getPopularArtists(
+        public ResponseEntity<BaseResponse<List<ArtistListResponse>>> getPopularArtists(
                         @RequestParam(defaultValue = "0") int minPopularity) {
                 return ResponseEntity.ok(artistService.getPopularArtists(minPopularity));
         }
