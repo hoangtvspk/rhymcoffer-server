@@ -67,7 +67,7 @@ public class AlbumController {
                 return ResponseEntity.ok(albumService.unsaveAlbum(albumId, userId));
         }
 
-        @PostMapping("/{albumId}/tracks")
+        @PostMapping("/{albumId}/add-tracks")
         public ResponseEntity<BaseResponse<Void>> addTracksToAlbum(
                         @PathVariable Long albumId,
                         @RequestBody List<Long> trackIds) {

@@ -303,6 +303,9 @@ public class AlbumService {
                                         .orElseThrow(() -> new RuntimeException("Album not found"));
                         List<Track> tracks = trackRepository.findAllById(trackIds);
 
+                        for (Track track : tracks) {
+                                track.setAlbum(album);
+                        }
                         album.getTracks().addAll(tracks);
                         albumRepository.save(album);
                         return BaseResponse.<Void>builder()
@@ -332,6 +335,9 @@ public class AlbumService {
                                         .orElseThrow(() -> new RuntimeException("Album not found"));
                         List<Track> tracks = trackRepository.findAllById(trackIds);
 
+                        for (Track track : tracks) {
+                                track.setAlbum(null);
+                        }
                         album.getTracks().removeAll(tracks);
                         albumRepository.save(album);
                         return BaseResponse.<Void>builder()

@@ -35,22 +35,14 @@ public class Album {
     private String albumType; // album, single, compilation
 
     @ManyToMany
-    @JoinTable(
-        name = "album_artists",
-        joinColumns = @JoinColumn(name = "album_id"),
-        inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
+    @JoinTable(name = "album_artists", joinColumns = @JoinColumn(name = "album_id"), inverseJoinColumns = @JoinColumn(name = "artist_id"))
     private Set<Artist> artists = new HashSet<>();
 
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL)
     private Set<Track> tracks = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(
-        name = "album_followers",
-        joinColumns = @JoinColumn(name = "album_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "album_followers", joinColumns = @JoinColumn(name = "album_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> followers = new HashSet<>();
 
     @CreatedDate
@@ -58,4 +50,4 @@ public class Album {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-} 
+}
