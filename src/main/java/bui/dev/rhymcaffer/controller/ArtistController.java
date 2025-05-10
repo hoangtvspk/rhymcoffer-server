@@ -74,4 +74,18 @@ public class ArtistController {
                         @RequestBody ArtistRequest request) {
                 return ResponseEntity.ok(artistService.updateArtist(id, request));
         }
+
+        @PostMapping("/{artistId}/tracks")
+        public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
+                        @PathVariable Long artistId,
+                        @RequestBody List<Long> trackIds) {
+                return ResponseEntity.ok(artistService.addTracksToArtist(artistId, trackIds));
+        }
+
+        @DeleteMapping("/{artistId}/tracks")
+        public ResponseEntity<BaseResponse<Void>> removeTracksFromArtist(
+                        @PathVariable Long artistId,
+                        @RequestBody List<Long> trackIds) {
+                return ResponseEntity.ok(artistService.removeTracksFromArtist(artistId, trackIds));
+        }
 }

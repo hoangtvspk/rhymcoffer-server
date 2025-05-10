@@ -338,7 +338,7 @@ public class AlbumService {
                         for (Track track : tracks) {
                                 track.setAlbum(null);
                         }
-                        album.getTracks().removeAll(tracks);
+                        tracks.forEach(album.getTracks()::remove);
                         albumRepository.save(album);
                         return BaseResponse.<Void>builder()
                                         .statusCode(200)

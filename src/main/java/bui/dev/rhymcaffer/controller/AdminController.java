@@ -82,6 +82,20 @@ public class AdminController {
         return ResponseEntity.ok(artistService.deleteArtist(id));
     }
 
+    @PostMapping("/artists/{artistId}/tracks")
+    public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
+            @PathVariable Long artistId,
+            @RequestBody List<Long> trackIds) {
+        return ResponseEntity.ok(artistService.addTracksToArtist(artistId, trackIds));
+    }
+
+    @DeleteMapping("/artists/{artistId}/tracks")
+    public ResponseEntity<BaseResponse<Void>> removeTracksFromArtist(
+            @PathVariable Long artistId,
+            @RequestBody List<Long> trackIds) {
+        return ResponseEntity.ok(artistService.removeTracksFromArtist(artistId, trackIds));
+    }
+
     // Album Management
     @GetMapping("/albums")
     public ResponseEntity<BaseResponse<List<AlbumResponse>>> getAllAlbums() {
