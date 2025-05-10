@@ -17,4 +17,4 @@ ENV SPRING_PROFILES_ACTIVE=dev
 EXPOSE 8080
 
 # Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"] 
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
