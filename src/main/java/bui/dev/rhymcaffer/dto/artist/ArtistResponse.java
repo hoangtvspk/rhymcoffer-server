@@ -20,8 +20,8 @@ public class ArtistResponse {
     private String imageUrl;
     private String description;
     private Integer popularity;
-    private List<TrackForArtistResponse> tracks;
-    private List<AlbumForArtistResponse> albums;
+    // private List<TrackForArtistResponse> tracks;
+    // private List<AlbumForArtistResponse> albums;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

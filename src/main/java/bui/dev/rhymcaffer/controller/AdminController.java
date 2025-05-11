@@ -8,6 +8,7 @@ import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
 import bui.dev.rhymcaffer.dto.common.BaseResponse;
 import bui.dev.rhymcaffer.dto.playlist.PlaylistRequest;
 import bui.dev.rhymcaffer.dto.playlist.PlaylistResponse;
+import bui.dev.rhymcaffer.dto.track.TrackListRequest;
 import bui.dev.rhymcaffer.dto.track.TrackListResponse;
 import bui.dev.rhymcaffer.dto.track.TrackRequest;
 import bui.dev.rhymcaffer.dto.track.TrackResponse;
@@ -18,6 +19,7 @@ import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -82,6 +84,12 @@ public class AdminController {
         return ResponseEntity.ok(artistService.deleteArtist(id));
     }
 
+    @GetMapping("/artists/{artistId}/tracks")
+    public ResponseEntity<BaseResponse<List<TrackResponse>>> getTracksOfArtist(
+            @PathVariable Long artistId) {
+        return ResponseEntity.ok(artistService.getTracksOfArtist(artistId));
+    }
+
     @PostMapping("/artists/{artistId}/tracks")
     public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
             @PathVariable Long artistId,
@@ -94,6 +102,26 @@ public class AdminController {
             @PathVariable Long artistId,
             @RequestBody List<Long> trackIds) {
         return ResponseEntity.ok(artistService.removeTracksFromArtist(artistId, trackIds));
+    }
+
+    @GetMapping("/artists/{artistId}/albums")
+    public ResponseEntity<BaseResponse<List<AlbumResponse>>> getAlbumsOfArtist(
+            @PathVariable Long artistId) {
+        return ResponseEntity.ok(artistService.getAlbumsOfArtist(artistId));
+    }
+
+    @PostMapping("/artists/{artistId}/albums")
+    public ResponseEntity<BaseResponse<Void>> addAlbumsToArtist(
+            @PathVariable Long artistId,
+            @RequestBody List<Long> albumIds) {
+        return ResponseEntity.ok(artistService.addAlbumsToArtist(artistId, albumIds));
+    }
+
+    @DeleteMapping("/artists/{artistId}/albums")
+    public ResponseEntity<BaseResponse<Void>> removeAlbumsFromArtist(
+            @PathVariable Long artistId,
+            @RequestBody List<Long> albumIds) {
+        return ResponseEntity.ok(artistService.removeAlbumsFromArtist(artistId, albumIds));
     }
 
     // Album Management
@@ -133,8 +161,9 @@ public class AdminController {
 
     // Track Management
     @GetMapping("/tracks")
-    public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks() {
-        return ResponseEntity.ok(trackService.getAllTracks());
+    public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks(
+            @ModelAttribute TrackListRequest filter) {
+        return ResponseEntity.ok(trackService.getTracks(filter));
     }
 
     @GetMapping("/tracks/{id}")

@@ -8,6 +8,12 @@ import bui.dev.rhymcaffer.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,12 +104,56 @@ public class TrackService {
         }
 
         @Transactional(readOnly = true)
-        public BaseResponse<List<TrackListResponse>> getAllTracks() {
+        public BaseResponse<List<TrackListResponse>> getTracks(TrackListRequest request) {
+
                 try {
-                        List<Track> tracks = trackRepository.findAll();
-                        List<TrackListResponse> responses = tracks.stream()
+                        Specification<Track> spec = (root, query, cb) -> {
+                                List<Predicate> predicates = new ArrayList<>();
+
+                                if (request.getName() != null && !request.getName().isEmpty()) {
+                                        predicates.add(cb.like(cb.lower(root.get("name")),
+                                                        "%" + request.getName().toLowerCase() + "%"));
+                                }
+
+                                if (request.getArtistId() != null) {
+                                        predicates.add(cb.equal(root.join("artists").get("id"),
+                                                        request.getArtistId()));
+                                }
+
+                                if (request.getAlbumId() != null) {
+                                        predicates.add(cb.equal(root.get("album").get("id"),
+                                                        request.getAlbumId()));
+                                }
+
+                                if (request.getUserId() != null) {
+                                        predicates.add(cb.isMember(request.getUserId(),
+                                                        root.get("savedByUsers").get("id")));
+                                }
+
+                                if (request.getMinPopularity() != null) {
+                                        predicates.add(cb.greaterThanOrEqualTo(root.get("popularity"),
+                                                        request.getMinPopularity()));
+                                }
+
+                                if (request.getExplicit() != null) {
+                                        predicates.add(cb.equal(root.get("explicit"),
+                                                        request.getExplicit()));
+                                }
+
+                                return cb.and(predicates.toArray(new Predicate[0]));
+                        };
+
+                        Pageable pageable = PageRequest.of(
+                                        request.getPage(),
+                                        request.getSize(),
+                                        Sort.by(request.getDirection(),
+                                                        request.getSortBy()));
+
+                        Page<Track> tracks = trackRepository.findAll(spec, pageable);
+                        List<TrackListResponse> responses = tracks.getContent().stream()
                                         .map(this::mapToListResponse)
                                         .toList();
+
                         return BaseResponse.<List<TrackListResponse>>builder()
                                         .statusCode(200)
                                         .isSuccess(true)
@@ -114,7 +164,7 @@ public class TrackService {
                         return BaseResponse.<List<TrackListResponse>>builder()
                                         .statusCode(500)
                                         .isSuccess(false)
-                                        .message("Failed to retrieve tracks: " + e.getMessage())
+                                        .message("Failed to get tracks: " + e.getMessage())
                                         .build();
                 }
         }
@@ -408,10 +458,10 @@ public class TrackService {
                                 .explicit(track.getExplicit())
                                 .isrc(track.getIsrc())
                                 .album(AlbumForTrackResponse.builder()
-                                        .id(track.getAlbum().getId())
-                                        .name(track.getAlbum().getName())
-                                        .imageUrl(track.getAlbum().getImageUrl())
-                                        .build())
+                                                .id(track.getAlbum().getId())
+                                                .name(track.getAlbum().getName())
+                                                .imageUrl(track.getAlbum().getImageUrl())
+                                                .build())
                                 .createdAt(track.getCreatedAt())
                                 .updatedAt(track.getUpdatedAt())
                                 .build();

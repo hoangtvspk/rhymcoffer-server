@@ -1,8 +1,10 @@
 package bui.dev.rhymcaffer.controller;
 
+import bui.dev.rhymcaffer.dto.track.TrackListRequest;
 import bui.dev.rhymcaffer.dto.track.TrackRequest;
 import bui.dev.rhymcaffer.dto.common.BaseResponse;
 import bui.dev.rhymcaffer.dto.track.TrackResponse;
+import org.springframework.data.domain.Page;
 import bui.dev.rhymcaffer.dto.track.TrackListResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.TrackService;
@@ -31,8 +33,9 @@ public class TrackController {
         }
 
         @GetMapping
-        public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks() {
-                return ResponseEntity.ok(trackService.getAllTracks());
+        public ResponseEntity<BaseResponse<List<TrackListResponse>>> getAllTracks(
+                        @ModelAttribute TrackListRequest filter) {
+                return ResponseEntity.ok(trackService.getTracks(filter));
         }
 
         @GetMapping("/search")

@@ -1,9 +1,11 @@
 package bui.dev.rhymcaffer.controller;
 
+import bui.dev.rhymcaffer.dto.album.AlbumResponse;
 import bui.dev.rhymcaffer.dto.artist.ArtistListResponse;
 import bui.dev.rhymcaffer.dto.artist.ArtistRequest;
 import bui.dev.rhymcaffer.dto.artist.ArtistResponse;
 import bui.dev.rhymcaffer.dto.common.BaseResponse;
+import bui.dev.rhymcaffer.dto.track.TrackResponse;
 import bui.dev.rhymcaffer.security.UserDetailsImpl;
 import bui.dev.rhymcaffer.service.ArtistService;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +77,12 @@ public class ArtistController {
                 return ResponseEntity.ok(artistService.updateArtist(id, request));
         }
 
+        @GetMapping("/{artistId}/tracks")
+        public ResponseEntity<BaseResponse<List<TrackResponse>>> getTracksOfArtist(
+                        @PathVariable Long artistId) {
+                return ResponseEntity.ok(artistService.getTracksOfArtist(artistId));
+        }
+
         @PostMapping("/{artistId}/tracks")
         public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
                         @PathVariable Long artistId,
@@ -87,5 +95,25 @@ public class ArtistController {
                         @PathVariable Long artistId,
                         @RequestBody List<Long> trackIds) {
                 return ResponseEntity.ok(artistService.removeTracksFromArtist(artistId, trackIds));
+        }
+
+        @GetMapping("/{artistId}/albums")
+        public ResponseEntity<BaseResponse<List<AlbumResponse>>> getAlbumsOfArtist(
+                        @PathVariable Long artistId) {
+                return ResponseEntity.ok(artistService.getAlbumsOfArtist(artistId));
+        }
+
+        @PostMapping("/{artistId}/albums")
+        public ResponseEntity<BaseResponse<Void>> addAlbumsToArtist(
+                        @PathVariable Long artistId,
+                        @RequestBody List<Long> albumIds) {
+                return ResponseEntity.ok(artistService.addAlbumsToArtist(artistId, albumIds));
+        }
+
+        @DeleteMapping("/{artistId}/albums")
+        public ResponseEntity<BaseResponse<Void>> removeAlbumsFromArtist(
+                        @PathVariable Long artistId,
+                        @RequestBody List<Long> albumIds) {
+                return ResponseEntity.ok(artistService.removeAlbumsFromArtist(artistId, albumIds));
         }
 }
