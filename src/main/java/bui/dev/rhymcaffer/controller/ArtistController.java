@@ -77,12 +77,6 @@ public class ArtistController {
                 return ResponseEntity.ok(artistService.updateArtist(id, request));
         }
 
-        @GetMapping("/{artistId}/tracks")
-        public ResponseEntity<BaseResponse<List<TrackResponse>>> getTracksOfArtist(
-                        @PathVariable Long artistId) {
-                return ResponseEntity.ok(artistService.getTracksOfArtist(artistId));
-        }
-
         @PostMapping("/{artistId}/tracks")
         public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
                         @PathVariable Long artistId,

@@ -84,12 +84,6 @@ public class AdminController {
         return ResponseEntity.ok(artistService.deleteArtist(id));
     }
 
-    @GetMapping("/artists/{artistId}/tracks")
-    public ResponseEntity<BaseResponse<List<TrackResponse>>> getTracksOfArtist(
-            @PathVariable Long artistId) {
-        return ResponseEntity.ok(artistService.getTracksOfArtist(artistId));
-    }
-
     @PostMapping("/artists/{artistId}/tracks")
     public ResponseEntity<BaseResponse<Void>> addTracksToArtist(
             @PathVariable Long artistId,

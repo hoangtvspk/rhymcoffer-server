@@ -244,55 +244,6 @@ public class ArtistService {
                 }
         }
 
-        // get tracks of an artist
-        @Transactional(readOnly = true)
-        public BaseResponse<List<TrackResponse>> getTracksOfArtist(Long artistId) {
-                try {
-                        Artist artist = artistRepository.findArtistById(artistId);
-                        if (artist == null) {
-                                return BaseResponse.<List<TrackResponse>>builder()
-                                                .statusCode(404)
-                                                .isSuccess(false)
-                                                .message("Artist not found")
-                                                .build();
-                        }
-                        ArtistResponse response = mapToResponse(artist);
-                        System.out.println("Artist: " + response);
-                        Set<Track> tracks = artist.getTracks();
-                        List<TrackResponse> responses = tracks.stream()
-                                        .map(this::mapToTrackResponse)
-                                        .toList();
-                        return BaseResponse.<List<TrackResponse>>builder()
-                                        .statusCode(200)
-                                        .isSuccess(true)
-                                        .message("Success")
-                                        .data(responses)
-                                        .build();
-                } catch (Exception e) {
-                        return BaseResponse.<List<TrackResponse>>builder()
-                                        .statusCode(500)
-                                        .isSuccess(false)
-                                        .message("Internal server error")
-                                        .build();
-                }
-        }
-
-        private TrackResponse mapToTrackResponse(Track track) {
-                return TrackResponse.builder()
-                                .id(track.getId())
-                                .name(track.getName())
-                                .imageUrl(track.getImageUrl())
-                                .durationMs(track.getDurationMs())
-                                .popularity(track.getPopularity())
-                                .trackUrl(track.getTrackUrl())
-                                .trackNumber(track.getTrackNumber())
-                                .explicit(track.getExplicit())
-                                .isrc(track.getIsrc())
-                                .createdAt(track.getCreatedAt())
-                                .updatedAt(track.getUpdatedAt())
-                                .build();
-        }
-
         @Transactional
         public BaseResponse<Void> addTracksToArtist(Long artistId, List<Long> trackIds) {
                 try {
