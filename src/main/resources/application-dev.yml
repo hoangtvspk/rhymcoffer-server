@@ -34,3 +34,9 @@ logging:
     org.springframework.jdbc: DEBUG
     com.zaxxer.hikari: DEBUG
     org.hibernate.engine.jdbc: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
